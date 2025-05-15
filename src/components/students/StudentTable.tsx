@@ -191,9 +191,14 @@ const StudentTable = () => {
   // Filter students
   const filteredStudents = students
     .filter((student) => {
+      // Exact matching from beginning for student ID if the search term appears to be an ID
+      const isIdSearch = /^\d/.test(searchTerm); // If search term starts with a number, assume ID search
+      
       const matchesSearch =
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.student_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (isIdSearch 
+          ? student.student_id.toLowerCase().startsWith(searchTerm.toLowerCase())
+          : student.student_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
         student.email.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesProgram =
@@ -812,15 +817,10 @@ const StudentTable = () => {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
-
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              More Filters
-            </Button>
           </div>
         </div>
 
@@ -1353,7 +1353,7 @@ const StudentTable = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                   </SelectContent>
                 </Select>

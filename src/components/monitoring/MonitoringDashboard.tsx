@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import {
   BarChart2,
   Activity,
-  AlertCircle,
   Search,
   Filter,
   Clock,
@@ -79,7 +78,6 @@ const MonitoringDashboard = () => {
     activeStudents: 0,
     totalHours: 0,
     completionRate: "0%",
-    atRiskStudents: 0,
   });
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -105,11 +103,20 @@ const MonitoringDashboard = () => {
       // Fetch total service hours
       const { data: serviceData, error: serviceError } = await supabase
         .from('service_assignments')
-        .select('hours');
+        .select('hours, status');
 
       if (serviceError) throw serviceError;
 
       const totalHours = serviceData?.reduce((sum, record) => sum + (record.hours || 0), 0) || 0;
+      
+      // Calculate completed hours (where status is 'completed')
+      const completedHours = serviceData?.reduce((sum, record) => 
+        record.status === 'completed' ? sum + (record.hours || 0) : sum, 0) || 0;
+      
+      // Calculate completion rate
+      const completionRate = totalHours > 0 
+        ? Math.round((completedHours / totalHours) * 100) 
+        : 0;
 
       // Fetch service categories
       const { data: categoryData, error: categoryError } = await supabase
@@ -170,8 +177,7 @@ const MonitoringDashboard = () => {
       setMetrics({
         activeStudents: activeStudentsCount || 0,
         totalHours,
-        completionRate: "0%", // TODO: Implement completion rate calculation
-        atRiskStudents: 0, // TODO: Implement at-risk students calculation
+        completionRate: `${completionRate}%`,
       });
       setCategories(processedCategories);
       setActivities(processedActivities);
@@ -291,7 +297,7 @@ const MonitoringDashboard = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
@@ -330,20 +336,6 @@ const MonitoringDashboard = () => {
             <div className="mt-4">
               <p className="text-sm text-muted-foreground">Completion Rate</p>
               <h3 className="text-2xl font-bold">{metrics.completionRate}</h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center">
-              <div className="bg-primary/10 p-2 rounded-full">
-                <AlertCircle className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground">At Risk Students</p>
-              <h3 className="text-2xl font-bold">{metrics.atRiskStudents}</h3>
             </div>
           </CardContent>
         </Card>

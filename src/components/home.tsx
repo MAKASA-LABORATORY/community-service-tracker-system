@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Bell,
-  Search,
   ChevronDown,
   User,
   Settings,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +36,6 @@ const HomePage = () => {
           <div className="space-y-6">
             <h1 className="text-2xl font-bold">Dashboard</h1>
             <DashboardOverview />
-            <StudentTable />
           </div>
         );
       case "students":
@@ -159,14 +156,7 @@ const HomePage = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 border-b flex items-center justify-between px-6">
-          <div className="flex items-center gap-4 w-1/3">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search..." className="w-full pl-8" />
-            </div>
-          </div>
-
+        <header className="h-16 border-b flex items-center justify-end px-6">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
