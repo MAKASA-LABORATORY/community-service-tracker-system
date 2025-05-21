@@ -7,7 +7,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+})
 
 // Types for our database tables
 export type Student = {
@@ -31,4 +37,18 @@ export type ServiceHours = {
   service_type: string
   date: string
   description: string
+}
+
+export type ServiceRequest = {
+  id: string
+  created_at: string
+  service_type: string
+  description: string
+  location: string
+  supervisor_name: string
+  supervisor_email: string
+  status: 'pending' | 'approved' | 'rejected'
+  required_hours: number
+  start_date: string
+  end_date: string
 } 

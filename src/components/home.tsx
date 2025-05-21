@@ -11,6 +11,8 @@ import {
   FileText,
   Home,
   Activity,
+  ClipboardList,
+  UserCheck,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,8 @@ import DashboardOverview from "./dashboard/DashboardOverview";
 import StudentTable from "./students/StudentTable";
 import MonitoringDashboard from "./monitoring/MonitoringDashboard";
 import ReportGenerator from "./reports/ReportGenerator";
+import ServiceRequests from "./requests/ServiceRequests";
+import SupervisorDashboard from "./supervisor/SupervisorDashboard";
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = React.useState("dashboard");
@@ -38,11 +42,25 @@ const HomePage = () => {
             <DashboardOverview />
           </div>
         );
+      case "supervisor":
+        return (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold">Supervisor Dashboard</h1>
+            <SupervisorDashboard />
+          </div>
+        );
       case "students":
         return (
           <div className="space-y-6">
             <h1 className="text-2xl font-bold">Student Management</h1>
             <StudentTable />
+          </div>
+        );
+      case "requests":
+        return (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold">Service Requests</h1>
+            <ServiceRequests />
           </div>
         );
       case "monitoring":
@@ -112,12 +130,28 @@ const HomePage = () => {
             Dashboard
           </Button>
           <Button
+            variant={activeTab === "supervisor" ? "secondary" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => setActiveTab("supervisor")}
+          >
+            <UserCheck className="mr-2 h-4 w-4" />
+            Supervisor
+          </Button>
+          <Button
             variant={activeTab === "students" ? "secondary" : "ghost"}
             className="w-full justify-start"
             onClick={() => setActiveTab("students")}
           >
             <Users className="mr-2 h-4 w-4" />
             Students
+          </Button>
+          <Button
+            variant={activeTab === "requests" ? "secondary" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => setActiveTab("requests")}
+          >
+            <ClipboardList className="mr-2 h-4 w-4" />
+            Service Requests
           </Button>
           <Button
             variant={activeTab === "monitoring" ? "secondary" : "ghost"}

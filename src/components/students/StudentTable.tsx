@@ -93,16 +93,16 @@ const StudentTable = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [serviceTypes] = useState([
-    'Community Outreach',
-    'Environmental Service',
-    'Educational Support',
-    'Healthcare Assistance',
-    'Youth Mentoring',
-    'Elderly Care',
-    'Food Bank Support',
-    'Animal Shelter',
-    'Cultural Events',
-    'Other'
+    'Campus Clean-up',
+    'Library Assistance',
+    'Student Tutoring',
+    'Event Support',
+    'Campus Tour Guide',
+    'Administrative Support',
+    'IT Help Desk',
+    'Campus Media Support',
+    'Student Organization Support',
+    'Campus Sustainability'
   ]);
   const [viewServiceDialogOpen, setViewServiceDialogOpen] = useState(false);
   const [studentAssignments, setStudentAssignments] = useState<ServiceAssignment[]>([]);
@@ -253,6 +253,14 @@ const StudentTable = () => {
   };
 
   const handleAddHours = async (student: Student) => {
+    if (student.status === 'completed') {
+      toast({
+        title: "Cannot Add Service",
+        description: "This student has already completed their service requirements.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSelectedStudent(student);
     setAddHoursDialogOpen(true);
   };
@@ -468,6 +476,7 @@ const StudentTable = () => {
             hours: hoursToAssign,
             location: formData.location,
             supervisor: formData.supervisor,
+            supervisor_email: formData.supervisor_email,
             verification_status: 'pending'
           },
         ])
@@ -941,6 +950,8 @@ const StudentTable = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleAddHours(student)}
+                              disabled={student.status === 'completed'}
+                              className={student.status === 'completed' ? 'opacity-50 cursor-not-allowed' : ''}
                             >
                               Assign Service
                             </DropdownMenuItem>
@@ -1002,6 +1013,7 @@ const StudentTable = () => {
               hours: formData.get('hours'),
               location: formData.get('location'),
               supervisor: formData.get('supervisor'),
+              supervisor_email: formData.get('supervisor_email'),
             });
           }}>
             <div className="grid gap-4 py-4">
@@ -1068,6 +1080,17 @@ const StudentTable = () => {
                   name="supervisor"
                   className="col-span-3"
                   placeholder="Supervisor name"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label className="text-right text-sm font-medium">Supervisor Email</label>
+                <Input
+                  name="supervisor_email"
+                  type="email"
+                  className="col-span-3"
+                  placeholder="supervisor@organization.com"
                   required
                 />
               </div>

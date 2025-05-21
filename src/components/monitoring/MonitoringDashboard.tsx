@@ -200,6 +200,61 @@ const MonitoringDashboard = () => {
     try {
       const newStatus = actionType === 'cancel' ? 'cancelled' : 'completed';
       
+      // If cancelling, first get the student's current remaining hours and service request details
+      if (actionType === 'cancel') {
+        // Get student's current remaining hours
+        const { data: studentData, error: studentFetchError } = await supabase
+          .from('students')
+          .select('remaining_hours')
+          .eq('id', selectedActivity.student_id)
+          .single();
+
+        if (studentFetchError) throw studentFetchError;
+
+        // Calculate new remaining hours by adding back the cancelled hours
+        const newRemainingHours = (studentData?.remaining_hours || 0) + selectedActivity.hours;
+
+        // Update student's remaining hours
+        const { error: studentUpdateError } = await supabase
+          .from('students')
+          .update({ remaining_hours: newRemainingHours })
+          .eq('id', selectedActivity.student_id);
+
+        if (studentUpdateError) throw studentUpdateError;
+
+        // Get the service request ID and current remaining hours
+        const { data: assignmentData, error: assignmentError } = await supabase
+          .from('service_assignments')
+          .select('service_request_id')
+          .eq('id', selectedActivity.id)
+          .single();
+
+        if (assignmentError) throw assignmentError;
+
+        if (assignmentData?.service_request_id) {
+          // Get the service request's current remaining hours
+          const { data: requestData, error: requestFetchError } = await supabase
+            .from('service_requests')
+            .select('remaining_hours')
+            .eq('id', assignmentData.service_request_id)
+            .single();
+
+          if (requestFetchError) throw requestFetchError;
+
+          // Calculate new remaining hours for the service request
+          const newRequestRemainingHours = (requestData?.remaining_hours || 0) + selectedActivity.hours;
+
+          // Update service request's remaining hours
+          const { error: requestUpdateError } = await supabase
+            .from('service_requests')
+            .update({ remaining_hours: newRequestRemainingHours })
+            .eq('id', assignmentData.service_request_id);
+
+          if (requestUpdateError) throw requestUpdateError;
+        }
+      }
+      
+      // Update the service assignment status
       const { error } = await supabase
         .from('service_assignments')
         .update({ 
@@ -243,8 +298,13 @@ const MonitoringDashboard = () => {
       
       toast({
         title: "Success",
-        description: `Service activity ${actionType === 'cancel' ? 'cancelled' : 'completed'} successfully`,
+        description: actionType === 'cancel' 
+          ? `Service activity cancelled and ${selectedActivity.hours} hours returned to student and service request successfully`
+          : "Service activity completed successfully",
       });
+
+      // Refresh the monitoring data to update metrics
+      fetchMonitoringData();
     } catch (error) {
       console.error(`Error ${actionType}ing activity:`, error);
       toast({
