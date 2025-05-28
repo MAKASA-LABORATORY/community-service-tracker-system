@@ -92,6 +92,7 @@ const SupervisorDashboard = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [studentProgress, setStudentProgress] = useState<StudentProgress[]>([]);
   const [recentRequests, setRecentRequests] = useState<ServiceRequest[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     totalStudents: 0,
     hoursCompleted: 0,
@@ -381,6 +382,16 @@ const SupervisorDashboard = () => {
     }
   };
 
+  const getFilteredStudents = () => {
+    if (!searchQuery.trim()) return studentProgress;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return studentProgress.filter(student => 
+      student.name.toLowerCase().includes(query) ||
+      student.student_id.toLowerCase().includes(query)
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -587,12 +598,20 @@ const SupervisorDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Student Progress</CardTitle>
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Search students..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-[200px]"
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {studentProgress.map((student) => (
+              {getFilteredStudents().map((student) => (
                 <div key={student.id} className="flex flex-col gap-2 border-b pb-4 last:border-0">
                   <div className="flex items-center justify-between">
                     <div>
@@ -644,8 +663,12 @@ const SupervisorDashboard = () => {
                   </div>
                 </div>
               ))}
-              {studentProgress.length === 0 && (
-                <p className="text-sm text-muted-foreground">No student progress data available</p>
+              {getFilteredStudents().length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {studentProgress.length === 0 
+                    ? "No student progress data available" 
+                    : "No students found matching your search"}
+                </p>
               )}
             </div>
           </CardContent>
